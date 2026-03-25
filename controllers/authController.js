@@ -1,49 +1,40 @@
-const db = require('../database/db');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const config = require('../config/jwt');
+const bcrypt = require('bcrypt');
+const db = require('../database/db');
+const { secret } = require('../config/jwt');
 
-exports.login = async (req, res) => {
+exports.login = (req, res) => {
   const { user, password } = req.body;
 
-  if (!user || !password) {
-    return res.status(400).json({ error: 'Usuário e senha obrigatórios' });
-  }
+db.all(
+  'SELECT * FROM users WHERE username = ?',
+  [user],
+  (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: 'Erro no banco' });
+    }
 
-  try {
-    // busca usuário
-    const userData = db.prepare(
-      "SELECT * FROM users WHERE username = ?"
-    ).get(user);
-
-    if (!userData) {
+    if (!rows || rows.length === 0) {
       return res.status(401).json({ error: 'Usuário inválido' });
     }
 
-    // valida senha
-    const validPassword = await bcrypt.compare(password, userData.password);
+    // procurar o usuário com senha válida
+    const validUser = rows.find(u => bcrypt.compareSync(password, u.password));
 
-    if (!validPassword) {
+    if (!validUser) {
       return res.status(401).json({ error: 'Senha inválida' });
     }
 
-    // gera token
     const token = jwt.sign(
-      {
-        id: userData.id,
-        user: userData.username
-      },
-      config.secret,
+      { user: validUser.username },
+      secret,
       { expiresIn: '1h' }
     );
 
-    res.json({ token });
-
-  } catch (error) {
-    console.error('Erro no login:', error);
-    res.status(500).json({ error: 'Erro no login' });
+    res.json({
+      message: 'Login realizado!',
+      token: token
+    });
   }
-};
-  
-
-
+);
+}
