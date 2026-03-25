@@ -1,39 +1,24 @@
-const bcrypt = require('bcrypt');
 const db = require('../database/db');
+const bcrypt = require('bcryptjs');
 
-exports.createUser = (req, res) => {
+exports.createUser = async (req, res) => {
   const { user, password } = req.body;
 
-  // 🔍 verificar se já existe
-  db.get(
-    'SELECT * FROM users WHERE username = ?',
-    [user],
-    (err, row) => {
-      if (row) {
-        return res.status(400).json({
-          error: 'Usuário já existe'
-        });
-      }
-
-      const hashedPassword = bcrypt.hashSync(password, 10);
-
-      const db = require('../database/db');
-
-exports.createUser = (req, res) => {
-  const { user, password } = req.body;
+  if (!user || !password) {
+    return res.status(400).json({ error: 'Usuário e senha obrigatórios' });
+  }
 
   try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     db.prepare(
       "INSERT INTO users (username, password) VALUES (?, ?)"
-    ).run(user, password);
+    ).run(user, hashedPassword);
 
-    res.json({ message: "Usuário criado com sucesso" });
+    res.json({ message: 'Usuário criado com sucesso' });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Erro ao criar usuário" });
+    console.error('Erro ao criar usuário:', error);
+    res.status(500).json({ error: 'Erro ao criar usuário' });
   }
 };
-        }
-      );
-    }
-  
