@@ -17,20 +17,23 @@ exports.createUser = (req, res) => {
 
       const hashedPassword = bcrypt.hashSync(password, 10);
 
-      db.run(
-        'INSERT INTO users (username, password) VALUES (?, ?)',
-        [user, hashedPassword],
-        function (err) {
-          if (err) {
-            return res.status(500).json({ error: 'Erro ao criar usuário' });
-          }
+      const db = require('../database/db');
 
-          res.json({
-            message: 'Usuário criado com sucesso!',
-            userId: this.lastID
-          });
+exports.createUser = (req, res) => {
+  const { user, password } = req.body;
+
+  try {
+    db.prepare(
+      "INSERT INTO users (username, password) VALUES (?, ?)"
+    ).run(user, password);
+
+    res.json({ message: "Usuário criado com sucesso" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao criar usuário" });
+  }
+};
         }
       );
     }
-  );
-};
+  

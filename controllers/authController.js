@@ -6,12 +6,11 @@ const { secret } = require('../config/jwt');
 exports.login = (req, res) => {
   const { user, password } = req.body;
 
-db.all(
-  'SELECT * FROM users WHERE username = ?',
-  [user],
-  (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: 'Erro no banco' });
+const db = require('../database/db');
+
+const userData = db.prepare(
+  "SELECT * FROM users WHERE username = ?"
+).get(user);
     }
 
     if (!rows || rows.length === 0) {
@@ -35,6 +34,6 @@ db.all(
       message: 'Login realizado!',
       token: token
     });
-  }
-);
-}
+  
+
+
