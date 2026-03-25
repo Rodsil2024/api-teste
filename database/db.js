@@ -4,7 +4,7 @@ const db = new Database('./database/database.db');
 
 console.log('Banco conectado 🚀');
 
-// criar tabela
+// garante tabela sempre
 db.prepare(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
