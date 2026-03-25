@@ -1,5 +1,7 @@
 const db = require('../database/db');
 
+console.log('DEBUG DB:', db);
+
 exports.saveFile = (username, filename) => {
   db.run(
     'INSERT INTO files (username, filename) VALUES (?, ?)',
