@@ -1,4 +1,4 @@
-const fileService = require('../services/fileServiceTEMP');
+const fileService = require('../services/fileService');
 
 exports.uploadFile = (req, res) => {
   if (!req.file) {
